@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Break-Even Analysis Simulation | IB DP Business Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #080c14;
+    --bg-secondary: #0d1424;
+    --bg-card: #111827;
+    --bg-card2: #141e30;
+    --border: #1e3a5f;
+    --border-bright: #2563eb;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-yellow: #f59e0b;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+    --text-primary: #f0f6ff;
+    --text-secondary: #94a3b8;
+    --text-muted: #475569;
+    --green-bar: #16a34a;
+    --amber-bar: #d97706;
+    --red-bar: #dc2626;
+    --glow-blue: 0 0 20px rgba(59,130,246,0.4);
+    --glow-cyan: 0 0 20px rgba(6,182,212,0.4);
+    --glow-green: 0 0 15px rgba(16,185,129,0.3);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg-primary); color:var(--text-primary); font-family:'DM Sans',sans-serif; overflow-x:hidden; min-height:100vh; }
+
+  /* ============ SPLASH ============ */
+  #splash {
+    position:fixed; inset:0; background:var(--bg-primary);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:1000; gap:24px;
+    background: radial-gradient(ellipse at 50% 60%, #0a1a3a 0%, #080c14 70%);
+  }
+  .splash-grid {
+    position:absolute; inset:0;
+    background-image: linear-gradient(rgba(59,130,246,0.07) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(59,130,246,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .splash-badge {
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:3px;
+    color:var(--accent-cyan); text-transform:uppercase;
+    border:1px solid var(--accent-cyan); padding:6px 18px; border-radius:2px;
+    opacity:0; animation: fadeUp 0.6s 0.3s forwards;
+  }
+  .splash-title {
+    font-family:'Orbitron',monospace; font-size:clamp(26px,4vw,52px);
+    font-weight:900; text-align:center; line-height:1.1;
+    background: linear-gradient(135deg, #60a5fa, #06b6d4, #3b82f6);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    opacity:0; animation: fadeUp 0.6s 0.5s forwards;
+  }
+  .splash-sub {
+    font-size:16px; color:var(--text-secondary); text-align:center; max-width:500px;
+    opacity:0; animation: fadeUp 0.6s 0.7s forwards;
+  }
+  .splash-meta {
+    display:flex; gap:24px; flex-wrap:wrap; justify-content:center;
+    opacity:0; animation: fadeUp 0.6s 0.9s forwards;
+  }
+  .splash-chip {
+    background:var(--bg-card); border:1px solid var(--border);
+    padding:8px 16px; border-radius:4px; font-size:13px; color:var(--text-secondary);
+    font-family:'Space Mono',monospace;
+  }
+  .splash-chip span { color:var(--accent-blue); }
+  #startBtn {
+    margin-top:12px; background:linear-gradient(135deg,#2563eb,#0891b2);
+    border:none; color:#fff; font-family:'Orbitron',monospace; font-size:15px;
+    font-weight:700; letter-spacing:2px; padding:16px 48px; border-radius:4px;
+    cursor:pointer; position:relative; overflow:hidden;
+    opacity:0; animation: fadeUp 0.6s 1.1s forwards;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(37,99,235,0.5);
+  }
+  #startBtn:hover { transform:scale(1.05); box-shadow: 0 0 50px rgba(37,99,235,0.8); }
+  #startBtn::after {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.15));
+    animation: shimmer 2s infinite;
+  }
+  .learning-goals {
+    background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
+    padding:20px 28px; max-width:560px; width:90%;
+    opacity:0; animation: fadeUp 0.6s 1.3s forwards;
+  }
+  .learning-goals h4 { color:var(--accent-cyan); font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; margin-bottom:12px; }
+  .learning-goals li { color:var(--text-secondary); font-size:14px; margin-left:18px; margin-bottom:6px; line-height:1.5; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  @keyframes slideIn { from{transform:translateX(120%);opacity:0} to{transform:translateX(0);opacity:1} }
+  @keyframes slideOut { from{transform:translateX(0);opacity:1} to{transform:translateX(120%);opacity:0} }
+  @keyframes glow { 0%,100%{box-shadow:0 0 10px rgba(6,182,212,0.3)} 50%{box-shadow:0 0 30px rgba(6,182,212,0.7)} }
+  @keyframes popIn { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+
+  /* ============ MAIN LAYOUT ============ */
+  #app { display:none; min-height:100vh; flex-direction:column; }
+  #app.active { display:flex; }
+
+  /* TOP BAR */
+  .topbar {
+    background:var(--bg-secondary); border-bottom:1px solid var(--border);
+    padding:10px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  .topbar-logo { font-family:'Orbitron',monospace; font-size:13px; font-weight:700; color:var(--accent-cyan); }
+  .topbar-sep { color:var(--border); font-size:18px; }
+
+  /* PHASE TIMELINE */
+  .phase-timeline { display:flex; gap:6px; flex:1; justify-content:center; align-items:center; }
+  .phase-dot {
+    display:flex; align-items:center; gap:6px;
+  }
+  .phase-dot .dot {
+    width:32px; height:32px; border-radius:50%; border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    color:var(--text-muted); transition:all 0.4s; cursor:default;
+  }
+  .phase-dot.active .dot {
+    border-color:var(--accent-cyan); color:var(--accent-cyan);
+    box-shadow:var(--glow-cyan); background:rgba(6,182,212,0.1);
+    animation: glow 2s infinite;
+  }
+  .phase-dot.complete .dot {
+    border-color:var(--accent-green); color:var(--accent-green);
+    background:rgba(16,185,129,0.1);
+  }
+  .phase-line { width:24px; height:2px; background:var(--border); }
+  .phase-dot.complete .phase-line-after { background:var(--accent-green); }
+
+  .topbar-reset {
+    background:transparent; border:1px solid var(--border);
+    color:var(--text-secondary); font-size:12px; padding:6px 14px;
+    border-radius:4px; cursor:pointer; font-family:'Space Mono',monospace;
+    transition:all 0.2s;
+  }
+  .topbar-reset:hover { border-color:var(--accent-red); color:var(--accent-red); }
+
+  /* ATL TRACKER */
+  .atl-tracker {
+    background:var(--bg-card); border:1px solid var(--border); border-radius:6px;
+    padding:8px 14px; font-size:11px;
+  }
+  .atl-tracker .label { color:var(--text-muted); font-family:'Space Mono',monospace; font-size:10px; letter-spacing:1px; margin-bottom:4px; }
+  .atl-skills { display:flex; gap:6px; flex-wrap:wrap; }
+  .atl-chip { background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:var(--accent-blue); padding:2px 8px; border-radius:2px; font-size:10px; font-family:'Space Mono',monospace; }
+
+  /* MAIN CONTENT */
+  .main-content {
+    flex:1; display:grid;
+    grid-template-columns: 300px 1fr 280px;
+    grid-template-rows: auto 1fr auto;
+    gap:0; overflow:hidden; max-height:calc(100vh - 60px);
+  }
+
+  /* PANELS */
+  .panel { background:var(--bg-card); border:1px solid var(--border); }
+
+  /* LEFT PANEL — sliders + advisor */
+  .left-panel {
+    grid-row:1/3; overflow-y:auto; border-right-width:1px;
+    padding-bottom:16px;
+  }
+  .panel-header {
+    padding:14px 16px; border-bottom:1px solid var(--border);
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px;
+    color:var(--accent-cyan); display:flex; align-items:center; gap:8px;
+  }
+  .panel-header .dot { width:8px; height:8px; border-radius:50%; background:var(--accent-cyan); animation:pulse 2s infinite; }
+
+  .slider-section { padding:16px; }
+  .slider-block { margin-bottom:20px; }
+  .slider-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .slider-name { font-size:13px; font-weight:600; color:var(--text-primary); }
+  .slider-val { font-family:'Space Mono',monospace; font-size:12px; color:var(--accent-blue); background:rgba(59,130,246,0.1); padding:2px 8px; border-radius:3px; }
+  .slider-tooltip { font-size:11px; color:var(--text-muted); margin-bottom:8px; line-height:1.4; font-style:italic; }
+  input[type=range] {
+    width:100%; -webkit-appearance:none; height:6px;
+    background:linear-gradient(90deg, var(--accent-blue) var(--pct,0%), var(--border) var(--pct,0%));
+    border-radius:3px; outline:none; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:18px; height:18px;
+    border-radius:50%; background:var(--accent-cyan);
+    border:2px solid var(--bg-primary);
+    box-shadow:0 0 8px rgba(6,182,212,0.6);
+  }
+  .slider-range-labels { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:4px; }
+
+  /* ADVISORS */
+  .advisor-section { padding:12px 16px; }
+  .advisor-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--text-muted); margin-bottom:10px; }
+  .advisor-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .advisor-chip {
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    background:var(--bg-card2); border:1px solid var(--border); border-radius:6px;
+    padding:8px 12px; cursor:pointer; transition:all 0.2s; position:relative;
+    flex:1; min-width:60px;
+  }
+  .advisor-chip:hover { border-color:var(--accent-blue); transform:translateY(-2px); }
+  .advisor-emoji { font-size:22px; }
+  .advisor-name { font-size:10px; color:var(--text-muted); text-align:center; }
+  .advisor-tooltip {
+    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+    background:#1e3a5f; border:1px solid var(--accent-blue); border-radius:6px;
+    padding:10px 14px; width:200px; font-size:12px; color:var(--text-primary);
+    display:none; z-index:100; line-height:1.5;
+  }
+  .advisor-chip:hover .advisor-tooltip { display:block; }
+
+  /* CENTER PANEL — scene + chart */
+  .center-top {
+    grid-column:2; border-bottom:1px solid var(--border);
+  }
+  .center-bottom { grid-column:2; overflow:hidden; }
+  .scene-container { position:relative; width:100%; height:200px; background:var(--bg-secondary); overflow:hidden; }
+  .scene-svg { width:100%; height:100%; }
+
+  /* CHART */
+  .chart-area { padding:16px; height:100%; }
+  .chart-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--text-muted); margin-bottom:10px; }
+  #chartCanvas { width:100%; height:180px; background:transparent; }
+
+  /* RIGHT PANEL */
+  .right-panel { grid-column:3; grid-row:1/3; overflow-y:auto; border-left-width:1px; }
+
+  /* METRICS */
+  .metric-block { padding:16px; border-bottom:1px solid var(--border); }
+  .metric-label { font-size:11px; color:var(--text-muted); font-family:'Space Mono',monospace; letter-spacing:1px; display:flex; justify-content:space-between; margin-bottom:6px; }
+  .metric-label .warn { color:var(--accent-red); animation:blink 1s infinite; }
+  .metric-value { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-primary); margin-bottom:8px; }
+  .metric-bar-track { height:8px; background:var(--bg-secondary); border-radius:4px; overflow:hidden; }
+  .metric-bar-fill { height:100%; border-radius:4px; transition:width 0.8s cubic-bezier(.4,0,.2,1), background 0.4s; }
+
+  /* BOTTOM — round info + controls */
+  .bottom-bar {
+    grid-column:1/4; background:var(--bg-secondary); border-top:1px solid var(--border);
+    padding:12px 20px; display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center;
+  }
+
+  /* ROUND INFO */
+  .round-info .round-num { font-family:'Orbitron',monospace; font-size:10px; letter-spacing:2px; color:var(--accent-cyan); margin-bottom:4px; }
+  .round-info .focus-q { font-size:14px; font-weight:600; color:var(--text-primary); margin-bottom:4px; }
+  .round-info .why-matters { font-size:12px; color:var(--text-secondary); line-height:1.4; }
+
+  /* PREDICTION */
+  .prediction-section { text-align:center; }
+  .pred-label { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--text-muted); margin-bottom:8px; }
+  .pred-options { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+  .pred-btn {
+    background:var(--bg-card); border:1px solid var(--border); color:var(--text-secondary);
+    padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px;
+    transition:all 0.2s; white-space:nowrap;
+  }
+  .pred-btn:hover { border-color:var(--accent-blue); color:var(--accent-blue); }
+  .pred-btn.selected { border-color:var(--accent-cyan); color:var(--accent-cyan); background:rgba(6,182,212,0.1); box-shadow:var(--glow-cyan); }
+
+  /* ADVANCE */
+  .advance-section { display:flex; justify-content:flex-end; }
+  #advanceBtn {
+    background:linear-gradient(135deg,#2563eb,#0891b2);
+    border:none; color:#fff; font-family:'Orbitron',monospace;
+    font-size:13px; font-weight:700; letter-spacing:2px;
+    padding:14px 28px; border-radius:4px; cursor:pointer;
+    transition:all 0.2s; box-shadow:var(--glow-blue);
+    position:relative; overflow:hidden;
+  }
+  #advanceBtn:disabled { background:var(--bg-card); border:1px solid var(--border); color:var(--text-muted); box-shadow:none; cursor:not-allowed; }
+  #advanceBtn:not(:disabled):hover { transform:scale(1.05); box-shadow:0 0 40px rgba(37,99,235,0.7); }
+
+  /* RECAP CARD */
+  .recap-card {
+    background:rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.3);
+    border-radius:6px; padding:12px 16px; margin:12px 16px;
+    font-size:12px; color:var(--text-secondary); line-height:1.6;
+  }
+  .recap-card .recap-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--accent-cyan); margin-bottom:8px; }
+
+  /* HINT SYSTEM */
+  .hint-card {
+    background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3);
+    border-radius:6px; padding:12px 16px; margin:8px 16px;
+    font-size:12px; color:var(--accent-yellow); line-height:1.5;
+  }
+
+  /* RESULT MODAL */
+  #resultModal {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    backdrop-filter:blur(4px); z-index:500; align-items:center; justify-content:center;
+    padding:16px;
+  }
+  #resultModal.open { display:flex; }
+  .modal-box {
+    background:var(--bg-card); border:1px solid var(--border-bright);
+    border-radius:12px; max-width:720px; width:100%; max-height:90vh; overflow-y:auto;
+    box-shadow: 0 0 60px rgba(37,99,235,0.3);
+    animation: popIn 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  .modal-header {
+    padding:20px 24px; border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .modal-title { font-family:'Orbitron',monospace; font-size:16px; color:var(--accent-cyan); }
+  .modal-close { background:none; border:none; color:var(--text-muted); font-size:22px; cursor:pointer; }
+  .modal-close:hover { color:var(--text-primary); }
+  .modal-body { padding:20px 24px; display:flex; flex-direction:column; gap:16px; }
+
+  /* OUTCOME GRID */
+  .outcome-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .outcome-cell {
+    background:var(--bg-secondary); border-radius:6px; padding:12px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .outcome-cell .oc-label { font-size:11px; color:var(--text-muted); font-family:'Space Mono',monospace; }
+  .outcome-cell .oc-val { font-family:'Space Mono',monospace; font-size:16px; font-weight:700; }
+  .outcome-cell .oc-arrow { font-size:12px; }
+  .up { color:var(--accent-green); }
+  .down { color:var(--accent-red); }
+  .stable { color:var(--accent-yellow); }
+
+  /* CAUSE EFFECT */
+  .cause-effect {
+    background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2);
+    border-radius:6px; padding:14px 16px;
+  }
+  .ce-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--accent-blue); margin-bottom:10px; }
+  .ce-chain { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ce-node { background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); border-radius:4px; padding:6px 12px; font-size:13px; color:var(--text-primary); }
+  .ce-arrow { color:var(--accent-blue); font-size:16px; }
+
+  /* FEEDBACK BOX */
+  .feedback-box {
+    background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3);
+    border-radius:6px; padding:14px 16px;
+  }
+  .fb-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--accent-green); margin-bottom:10px; }
+  .fb-row { font-size:13px; color:var(--text-secondary); margin-bottom:6px; line-height:1.5; }
+  .fb-row strong { color:var(--text-primary); }
+
+  /* REALWORLD */
+  .realworld-box {
+    background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.3);
+    border-radius:6px; padding:14px 16px;
+  }
+  .rw-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--accent-purple); margin-bottom:8px; }
+  .rw-text { font-size:13px; color:var(--text-secondary); line-height:1.5; }
+
+  /* EVENT CARD */
+  .event-card-banner {
+    background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.4);
+    border-radius:6px; padding:14px 16px; animation:popIn 0.4s;
+  }
+  .ec-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--accent-red); margin-bottom:6px; }
+  .ec-text { font-size:13px; color:var(--text-primary); line-height:1.5; }
+  .ec-impact { font-size:12px; color:var(--accent-red); margin-top:6px; font-family:'Space Mono',monospace; }
+
+  /* LP CHIP */
+  .lp-section { margin-top:8px; }
+  .lp-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--text-muted); margin-bottom:8px; }
+  .lp-options { display:flex; gap:8px; flex-wrap:wrap; }
+  .lp-btn {
+    background:var(--bg-secondary); border:1px solid var(--border); color:var(--text-secondary);
+    padding:6px 14px; border-radius:20px; cursor:pointer; font-size:12px; transition:all 0.2s;
+  }
+  .lp-btn:hover { border-color:var(--accent-purple); color:var(--accent-purple); }
+  .lp-btn.selected { border-color:var(--accent-purple); color:var(--accent-purple); background:rgba(139,92,246,0.1); }
+
+  /* IB REFLECTION */
+  #reflectionPanel {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9);
+    z-index:600; overflow-y:auto; padding:24px;
+  }
+  .reflection-box {
+    max-width:760px; margin:0 auto; background:var(--bg-card);
+    border:1px solid var(--border-bright); border-radius:12px;
+    box-shadow:0 0 80px rgba(37,99,235,0.25);
+    animation: popIn 0.4s;
+  }
+  .reflection-header { padding:24px 28px; border-bottom:1px solid var(--border); }
+  .reflection-header h2 { font-family:'Orbitron',monospace; font-size:20px; color:var(--accent-cyan); }
+  .reflection-header p { font-size:14px; color:var(--text-secondary); margin-top:6px; }
+  .reflection-body { padding:24px 28px; display:flex; flex-direction:column; gap:16px; }
+  .ref-q {
+    background:var(--bg-secondary); border:1px solid var(--border); border-radius:6px; padding:16px;
+  }
+  .ref-q .q-num { font-family:'Space Mono',monospace; font-size:10px; color:var(--accent-cyan); margin-bottom:6px; letter-spacing:1px; }
+  .ref-q .q-text { font-size:14px; color:var(--text-primary); line-height:1.6; }
+  .ref-q .q-hint { font-size:12px; color:var(--text-muted); margin-top:6px; font-style:italic; }
+  .reflection-footer { padding:16px 28px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; }
+  .btn-close-refl { background:var(--bg-card2); border:1px solid var(--border); color:var(--text-secondary); padding:10px 24px; border-radius:4px; cursor:pointer; font-family:'Space Mono',monospace; font-size:12px; }
+  .btn-close-refl:hover { border-color:var(--accent-blue); color:var(--accent-blue); }
+
+  /* TOAST */
+  #toastContainer { position:fixed; top:16px; right:16px; z-index:900; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+  .toast {
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:6px; padding:12px 18px; font-size:13px;
+    color:var(--text-primary); max-width:320px;
+    animation: slideIn 0.4s forwards; pointer-events:auto;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  }
+  .toast.out { animation: slideOut 0.4s forwards; }
+  .toast.success { border-color:var(--accent-green); }
+  .toast.warn { border-color:var(--accent-yellow); }
+  .toast.danger { border-color:var(--accent-red); }
+
+  /* FINISH BANNER */
+  .finish-banner {
+    background:linear-gradient(135deg,rgba(37,99,235,0.15),rgba(6,182,212,0.15));
+    border:1px solid var(--accent-cyan); border-radius:8px; padding:16px 20px;
+    text-align:center; margin:12px 16px;
+  }
+  .finish-banner h3 { font-family:'Orbitron',monospace; color:var(--accent-cyan); margin-bottom:8px; }
+  .finish-banner p { font-size:13px; color:var(--text-secondary); }
+  #reflectionBtn {
+    margin-top:12px; background:linear-gradient(135deg,#7c3aed,#2563eb);
+    border:none; color:#fff; font-family:'Orbitron',monospace;
+    font-size:12px; font-weight:700; letter-spacing:1px;
+    padding:10px 24px; border-radius:4px; cursor:pointer;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:var(--bg-secondary); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  @media (max-width:900px) {
+    .main-content { grid-template-columns:1fr; grid-template-rows:auto; }
+    .left-panel,.right-panel { grid-row:auto; grid-column:1; }
+    .center-top,.center-bottom { grid-column:1; }
+    .bottom-bar { grid-template-columns:1fr; gap:12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-grid"></div>
+  <div class="splash-badge">IB DP Business Management · Year 11</div>
+  <div class="splash-title">Break-Even Analysis<br>&amp; Production Decisions</div>
+  <div class="splash-sub">An interactive factory floor simulation exploring the economics of production, cost structure, and financial viability.</div>
+  <div class="splash-meta">
+    <div class="splash-chip">Key Concept: <span>Efficiency</span></div>
+    <div class="splash-chip">ATL: <span>Thinking · Research</span></div>
+    <div class="splash-chip">LP: <span>Thinkers · Balanced</span></div>
+    <div class="splash-chip">Rounds: <span>5</span></div>
+  </div>
+  <div class="learning-goals">
+    <h4>▸ Learning Objectives</h4>
+    <ul>
+      <li>Adjust variables and observe cause-and-effect relationships in real time</li>
+      <li>Identify which variables have the most significant impact on break-even outcomes</li>
+      <li>Connect financial decisions to real-world business strategy and ethical dimensions</li>
+    </ul>
+  </div>
+  <button id="startBtn" onclick="startSim()">▶ LAUNCH SIMULATION</button>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">⚙ BREAK-EVEN LAB</div>
+    <div class="topbar-sep">|</div>
+    <div class="phase-timeline" id="phaseTimeline"></div>
+    <div class="topbar-sep">|</div>
+    <div class="atl-tracker">
+      <div class="label">ATL SKILLS</div>
+      <div class="atl-skills">
+        <div class="atl-chip">Thinking</div>
+        <div class="atl-chip">Research</div>
+        <div class="atl-chip">Decision-making</div>
+      </div>
+    </div>
+    <button class="topbar-reset" onclick="resetSim()">↺ RESET</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- LEFT PANEL -->
+    <div class="panel left-panel">
+      <div class="panel-header"><div class="dot"></div> PRODUCTION VARIABLES</div>
+      <div id="recapCard"></div>
+      <div id="hintCard"></div>
+      <div class="slider-section" id="sliderSection"></div>
+      <div class="advisor-section">
+        <div class="advisor-title">▸ ADVISOR PANEL</div>
+        <div class="advisor-row" id="advisorRow"></div>
+      </div>
+    </div>
+
+    <!-- CENTER TOP — SVG SCENE -->
+    <div class="panel center-top">
+      <div class="scene-container">
+        <svg class="scene-svg" id="sceneSVG" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Sky gradient -->
+          <defs>
+            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#050c1a"/>
+              <stop offset="100%" stop-color="#0d1424"/>
+            </linearGradient>
+            <linearGradient id="buildGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1e3a5f"/>
+              <stop offset="100%" stop-color="#111827"/>
+            </linearGradient>
+            <linearGradient id="profitGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+            <linearGradient id="lossGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#ef4444"/>
+              <stop offset="100%" stop-color="#dc2626"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <rect width="700" height="200" fill="url(#skyGrad)"/>
+
+          <!-- Factory buildings (scale with fixed cost) -->
+          <g id="factory-buildings">
+            <rect id="building1" x="20" y="60" width="60" height="120" fill="url(#buildGrad)" rx="2"/>
+            <rect id="building2" x="90" y="80" width="45" height="100" fill="url(#buildGrad)" rx="2"/>
+            <rect id="building3" x="145" y="70" width="55" height="110" fill="url(#buildGrad)" rx="2"/>
+            <!-- Windows -->
+            <rect x="30" y="70" width="12" height="10" fill="#06b6d4" opacity="0.6" rx="1"/>
+            <rect x="50" y="70" width="12" height="10" fill="#06b6d4" opacity="0.6" rx="1"/>
+            <rect x="30" y="90" width="12" height="10" fill="#06b6d4" opacity="0.4" rx="1"/>
+            <rect x="50" y="90" width="12" height="10" fill="#3b82f6" opacity="0.5" rx="1"/>
+            <!-- Chimneys -->
+            <rect id="chimney1" x="45" y="50" width="10" height="20" fill="#1e3a5f" rx="1"/>
+            <rect id="chimney2" x="155" y="55" width="8" height="18" fill="#1e3a5f" rx="1"/>
+            <!-- Smoke -->
+            <circle id="smoke1" cx="50" cy="45" r="6" fill="#334155" opacity="0.6"/>
+            <circle id="smoke2" cx="159" cy="40" r="5" fill="#334155" opacity="0.5"/>
+          </g>
+
+          <!-- Conveyor belt (production line) -->
+          <g id="conveyor">
+            <rect x="220" y="155" width="360" height="12" fill="#1e3a5f" rx="3"/>
+            <rect x="220" y="155" width="360" height="4" fill="#2563eb" opacity="0.4" rx="2"/>
+            <!-- Belt segments -->
+            <g id="beltSegments">
+              <rect class="belt-seg" x="225" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="255" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="285" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="315" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="345" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="375" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="405" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="435" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="465" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+              <rect class="belt-seg" x="495" y="155" width="25" height="12" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.5"/>
+            </g>
+            <!-- Products on belt -->
+            <g id="products">
+              <rect id="p1" x="240" y="143" width="18" height="12" fill="#3b82f6" rx="2" opacity="0.8"/>
+              <rect id="p2" x="300" y="143" width="18" height="12" fill="#06b6d4" rx="2" opacity="0.8"/>
+              <rect id="p3" x="360" y="143" width="18" height="12" fill="#3b82f6" rx="2" opacity="0.8"/>
+              <rect id="p4" x="420" y="143" width="18" height="12" fill="#06b6d4" rx="2" opacity="0.8"/>
+              <rect id="p5" x="480" y="143" width="18" height="12" fill="#3b82f6" rx="2" opacity="0.8"/>
+            </g>
+          </g>
+
+          <!-- Break-even graph on right side -->
+          <g id="beGraph" transform="translate(530,20)">
+            <rect width="155" height="160" fill="rgba(13,20,36,0.8)" rx="4" stroke="#1e3a5f" stroke-width="1"/>
+            <text x="6" y="14" font-size="8" fill="#94a3b8" font-family="Space Mono,monospace">BREAK-EVEN</text>
+            <!-- Axes -->
+            <line x1="20" y1="145" x2="145" y2="145" stroke="#1e3a5f" stroke-width="1"/>
+            <line x1="20" y1="20" x2="20" y2="145" stroke="#1e3a5f" stroke-width="1"/>
+            <!-- Revenue line (green/red) -->
+            <line id="revLine" x1="20" y1="145" x2="145" y2="60" stroke="#10b981" stroke-width="2" filter="url(#glow)"/>
+            <!-- Total cost line (amber) -->
+            <line id="tcLine" x1="20" y1="100" x2="145" y2="70" stroke="#f59e0b" stroke-width="2"/>
+            <!-- Break-even point dot -->
+            <circle id="beDot" cx="80" cy="95" r="5" fill="#06b6d4" filter="url(#glow)"/>
+            <text id="beLabel" x="86" y="92" font-size="7" fill="#06b6d4" font-family="Space Mono,monospace">BE</text>
+            <!-- Legend -->
+            <line x1="25" y1="155" x2="40" y2="155" stroke="#10b981" stroke-width="2"/>
+            <text x="43" y="158" font-size="7" fill="#94a3b8" font-family="Space Mono,monospace">Revenue</text>
+            <line x1="85" y1="155" x2="100" y2="155" stroke="#f59e0b" stroke-width="2"/>
+            <text x="103" y="158" font-size="7" fill="#94a3b8" font-family="Space Mono,monospace">Cost</text>
+          </g>
+
+          <!-- Fixed cost stacks (left) -->
+          <g id="fixedStacks">
+            <rect id="fc1" x="210" y="140" width="18" height="25" fill="#2563eb" opacity="0.7" rx="2"/>
+            <rect id="fc2" x="210" y="112" width="18" height="25" fill="#1d4ed8" opacity="0.6" rx="2"/>
+            <rect id="fc3" x="210" y="84" width="18" height="25" fill="#1e40af" opacity="0.5" rx="2"/>
+            <rect id="fc4" x="210" y="56" width="18" height="25" fill="#1e3a8a" opacity="0.4" rx="2"/>
+          </g>
+          <text x="205" y="180" font-size="7" fill="#475569" font-family="Space Mono,monospace" text-anchor="middle">FIXED↑</text>
+
+          <!-- Profit/Loss indicator -->
+          <g id="profitIndicator" transform="translate(350,18)">
+            <rect id="profitBox" width="120" height="28" rx="4" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1"/>
+            <text id="profitText" x="60" y="19" text-anchor="middle" font-size="12" fill="#10b981" font-family="Space Mono,monospace" font-weight="bold">PROFIT</text>
+          </g>
+
+          <!-- Robot arm (automation) -->
+          <g id="robotArm" transform="translate(485,90)">
+            <rect x="-5" y="0" width="10" height="50" fill="#1e3a5f" rx="3"/>
+            <circle cx="0" cy="0" r="8" fill="#2563eb" stroke="#06b6d4" stroke-width="1.5"/>
+            <rect x="-3" y="50" width="6" height="15" fill="#1e3a5f" rx="2" transform="rotate(-30)"/>
+            <text x="15" y="25" font-size="8" fill="#475569" font-family="Space Mono,monospace">AUTO</text>
+          </g>
+
+          <!-- Automation indicator -->
+          <circle id="autoLight" cx="486" cy="90" r="4" fill="#10b981" opacity="0.3"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- CENTER BOTTOM — Chart -->
+    <div class="panel center-bottom">
+      <div class="chart-area">
+        <div class="chart-title">▸ PERFORMANCE METRICS — ALL ROUNDS</div>
+        <canvas id="chartCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL — Metrics -->
+    <div class="panel right-panel">
+      <div class="panel-header"><div class="dot"></div> LIVE METRICS</div>
+      <div id="metricsArea"></div>
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="bottom-bar">
+      <div class="round-info" id="roundInfo"></div>
+      <div class="prediction-section">
+        <div class="pred-label">▸ YOUR PREDICTION</div>
+        <div class="pred-options" id="predOptions">
+          <button class="pred-btn" onclick="selectPred(this,'thriving')">🌱 Thriving</button>
+          <button class="pred-btn" onclick="selectPred(this,'stable')">⚖️ Stable</button>
+          <button class="pred-btn" onclick="selectPred(this,'stressed')">⚠️ Stressed</button>
+          <button class="pred-btn" onclick="selectPred(this,'crisis')">🔴 Crisis</button>
+        </div>
+      </div>
+      <div class="advance-section">
+        <button id="advanceBtn" disabled onclick="advanceRound()">ADVANCE →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div id="resultModal">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<!-- REFLECTION PANEL -->
+<div id="reflectionPanel">
+  <div class="reflection-box">
+    <div class="reflection-header">
+      <h2>IB Reflection Panel</h2>
+      <p>Use evidence from your simulation results to answer these discussion questions. Connect your thinking to the key concept of <strong>Efficiency</strong>.</p>
+    </div>
+    <div class="reflection-body">
+      <div class="ref-q"><div class="q-num">QUESTION 01</div><div class="q-text">What does "efficiency" mean in this simulation context? Give a specific real-world example from your results.</div><div class="q-hint">Hint: Consider how break-even units changed when you altered fixed vs. variable costs.</div></div>
+      <div class="ref-q"><div class="q-num">QUESTION 02</div><div class="q-text">Which single decision had the most unexpected consequence — and why were you surprised? Use specific data from your results.</div><div class="q-hint">Hint: Was it the automation investment or the selling price slider that surprised you most?</div></div>
+      <div class="ref-q"><div class="q-num">QUESTION 03</div><div class="q-text">How would someone from a different cultural or economic background approach these production decisions differently? Consider a small business owner in a developing economy.</div><div class="q-hint">Hint: Think about access to capital, labour costs, and market size differences.</div></div>
+      <div class="ref-q"><div class="q-num">QUESTION 04</div><div class="q-text">What would you change if you ran the simulation again? Use specific evidence from your metric results to justify your strategy.</div></div>
+      <div class="ref-q"><div class="q-num">QUESTION 05</div><div class="q-text">How does this simulation connect to a current global issue you know about outside school? (e.g. supply chain disruption, inflation, automation and employment)</div></div>
+      <div class="ref-q"><div class="q-num">QUESTION 06</div><div class="q-text">Which IB Learner Profile attribute did your decision-making best reflect: <strong>Thinker</strong> or <strong>Balanced</strong>? Justify with evidence from at least two rounds.</div></div>
+    </div>
+    <div class="reflection-footer">
+      <button class="btn-close-refl" onclick="document.getElementById('reflectionPanel').style.display='none'">↩ RETURN TO SIMULATION</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let state = {
+  round: 0,
+  maxRounds: 5,
+  prediction: null,
+  wrongPredictions: 0,
+  sliders: { units:2, price:2, varCost:2, fixedCost:2, automation:2 },
+  history: [], // {revenue, totalCost, profit, beUnits, marginSafety}
+  eventTriggered: {},
+  lpChoices: [],
+  done: false
+};
+
+const SLIDER_CONFIG = [
+  { key:'units', label:'Units Produced / Month', tooltip:'This slider models Output Volume — a core concept from Operations Management. Higher output can spread fixed costs but also risks overproduction.', min:'100 units', max:'10,000 units', vals:[100,500,1500,4000,10000] },
+  { key:'price', label:'Selling Price / Unit', tooltip:'Relates to Revenue and Pricing Strategy from Unit 3 Finance. Price must exceed variable cost or every unit sold deepens losses.', min:'Below VC', max:'High Premium', vals:[5,12,20,35,60] },
+  { key:'varCost', label:'Variable Cost / Unit', tooltip:'This is your Cost of Goods Sold per unit — studied in the Finance unit. Lower VC = higher contribution margin = faster break-even.', min:'Optimised', max:'Inefficient', vals:[3,8,14,20,28] },
+  { key:'fixedCost', label:'Fixed Cost Commitment', tooltip:'Fixed costs are incurred regardless of output — rent, salaries, machinery. From your Cost Classification work in Unit 3.', min:'Minimal', max:'Heavy OH', vals:[5000,20000,50000,100000,200000] },
+  { key:'automation', label:'Automation Investment', tooltip:'Automation reduces variable cost per unit but raises fixed costs. Connects to the Operations vs Finance trade-off in your HL content.', min:'None', max:'Full Auto', vals:[0,1,2,3,4] }
+];
+
+const ROUND_DATA = [
+  { focus:'What happens to break-even when you increase fixed cost commitment?', why:'Fixed costs are the foundation of break-even analysis. Understanding their impact is essential for any production decision.', realWorld:'Tesla Gigafactory: Elon Musk committed $5B in fixed costs to achieve economies of scale — a massive bet that only pays off at high volume.' },
+  { focus:'How does selling price interact with variable cost to create (or destroy) contribution margin?', why:'Contribution margin per unit (Price − Variable Cost) directly determines how many units must be sold before profit begins.', realWorld:'Restaurant industry: A £12 meal with £9 variable cost has only £3 contribution. A busy restaurant may still lose money with high fixed overheads.' },
+  { focus:'Can automation investment reduce your break-even point — or does it backfire?', why:'Automation is a classic business dilemma: it reduces VC but raises FC, shifting the break-even point in complex ways.', realWorld:'Airlines post-COVID: Carriers invested heavily in automation (check-in, baggage) but still faced massive fixed cost losses when volume collapsed.' },
+  { focus:'What is the relationship between production volume and margin of safety?', why:'Margin of safety shows how far above break-even you are operating — your buffer against market downturns.', realWorld:'Small businesses during COVID: Many operated near their break-even with minimal margin of safety, making any demand drop fatal.' },
+  { focus:'Synthesise: Which combination of variables creates the most resilient business model?', why:'Final round — apply everything learned. A resilient model balances break-even point, margin of safety, and risk exposure.', realWorld:'Tesla Gigafactory revisited: By Round 5, Tesla\'s fixed cost bet paid off as volume exceeded 500,000 units, dramatically lowering average cost per car.' }
+];
+
+const EVENTS = [
+  { round:2, title:'⚡ Supply Chain Disruption!', text:'A global semiconductor shortage has hit your suppliers. Variable cost per unit increases by 20% this round.', impact:'Variable Cost ×1.2', modifier: s => ({...s, varCost: Math.min(4, s.varCost+1)}) },
+  { round:4, title:'📉 Market Demand Shock!', text:'A sudden economic downturn has reduced consumer demand. Units sold this round drop by 30%.', impact:'Units Produced ×0.7', modifier: s => ({...s, units: Math.max(0, s.units-1)}) },
+  { round:3, title:'💡 Innovation Opportunity!', text:'A new production technique is available — if you have automation ≥2, your variable cost drops by 15%.', impact:'If Auto ≥2: VC −15%', modifier: s => s.automation >= 2 ? {...s, varCost: Math.max(0, s.varCost-1)} : s }
+];
+
+const ADVISORS = [
+  { emoji:'👩‍💼', name:'CFO', tip:'Watch your contribution margin closely. If Price ≤ Variable Cost, every unit sold is a loss. Check: (Price − VC) × Units > Fixed Cost?' },
+  { emoji:'🏭', name:'Ops Dir', tip:'Higher automation raises fixed costs but lowers variable costs. This only helps if volume is high enough to recover the fixed investment.' },
+  { emoji:'📊', name:'Analyst', tip:'Break-even formula: FC ÷ (Price − VC). A small increase in selling price can dramatically reduce your break-even point.' },
+  { emoji:'⚖️', name:'IB Coach', tip:'Think like a Thinker: test your prediction before clicking Advance. What does your calculation say before the simulation reveals it?' }
+];
+
+// ========== COMPUTE ==========
+function computeMetrics(s) {
+  let units = SLIDER_CONFIG[0].vals[s.units];
+  let price = SLIDER_CONFIG[1].vals[s.price];
+  let vc = SLIDER_CONFIG[2].vals[s.varCost];
+  let fc = SLIDER_CONFIG[3].vals[s.fixedCost];
+  let auto = s.automation;
+
+  // Automation reduces VC but adds to FC
+  let autoFCBonus = auto * 12000;
+  let autoVCReduction = auto * 0.08;
+  let effectiveVC = Math.max(1, vc * (1 - autoVCReduction));
+  let effectiveFC = fc + autoFCBonus;
+
+  let contributionPerUnit = price - effectiveVC;
+  let beUnits = contributionPerUnit > 0 ? Math.ceil(effectiveFC / contributionPerUnit) : Infinity;
+  let revenue = units * price;
+  let totalVC = units * effectiveVC;
+  let totalCost = effectiveFC + totalVC;
+  let profit = revenue - totalCost;
+  let marginSafety = contributionPerUnit > 0 ? Math.max(0, units - beUnits) : 0;
+
+  // Convert to 0–100 bar values
+  let revBar = Math.min(100, (revenue / 600000) * 100);
+  let costBar = Math.min(100, (totalCost / 600000) * 100);
+  let profitBar = profit >= 0 ? Math.min(100, (profit / 200000) * 100) : Math.max(0, 50 + (profit / 10000));
+  let beBar = Math.min(100, (beUnits / 15000) * 100);
+  let mosBar = Math.min(100, (marginSafety / 5000) * 100);
+
+  return { units, price, vc:effectiveVC, fc:effectiveFC, revenue, totalCost, profit, beUnits, marginSafety, contributionPerUnit, revBar, costBar, profitBar: Math.max(0,profitBar), beBar, mosBar };
+}
+
+// ========== INIT ==========
+function startSim() {
+  document.getElementById('splash').style.display='none';
+  document.getElementById('app').classList.add('active');
+  buildUI();
+  renderRound();
+  toast('Simulation started! Set your sliders and make a prediction.','success');
+}
+
+function buildUI() {
+  buildPhaseTimeline();
+  buildSliders();
+  buildAdvisors();
+  buildMetrics();
+  initChart();
+}
+
+function buildPhaseTimeline() {
+  const tl = document.getElementById('phaseTimeline');
+  tl.innerHTML = '';
+  for(let i=0;i<5;i++){
+    const pd = document.createElement('div');
+    pd.className='phase-dot';
+    pd.id='phase-'+i;
+    pd.innerHTML=`<div class="dot">${i+1}</div>`;
+    if(i<4) pd.innerHTML+=`<div class="phase-line"></div>`;
+    tl.appendChild(pd);
+  }
+  updatePhaseTimeline();
+}
+
+function updatePhaseTimeline() {
+  for(let i=0;i<5;i++){
+    const pd=document.getElementById('phase-'+i);
+    pd.classList.remove('active','complete');
+    if(i < state.round) pd.classList.add('complete');
+    else if(i === state.round) pd.classList.add('active');
+  }
+}
+
+function buildSliders() {
+  const sec = document.getElementById('sliderSection');
+  sec.innerHTML='';
+  SLIDER_CONFIG.forEach(cfg=>{
+    const val = state.sliders[cfg.key];
+    const pct = (val/4)*100;
+    const block=document.createElement('div');
+    block.className='slider-block';
+    block.id='sliderBlock-'+cfg.key;
+    block.innerHTML=`
+      <div class="slider-label">
+        <span class="slider-name">${cfg.label}</span>
+        <span class="slider-val" id="sliderVal-${cfg.key}">${getSliderDisplay(cfg.key,val)}</span>
+      </div>
+      <div class="slider-tooltip">${cfg.tooltip}</div>
+      <input type="range" min="0" max="4" step="1" value="${val}"
+        style="--pct:${pct}%"
+        oninput="onSlider('${cfg.key}',this)"
+        ${state.done?'disabled':''}
+      />
+      <div class="slider-range-labels"><span>${cfg.min}</span><span>${cfg.max}</span></div>
+    `;
+    sec.appendChild(block);
+  });
+}
+
+function getSliderDisplay(key,val){
+  const cfg=SLIDER_CONFIG.find(c=>c.key===key);
+  if(key==='units') return cfg.vals[val].toLocaleString()+' u';
+  if(key==='price') return '£'+cfg.vals[val];
+  if(key==='varCost') return '£'+cfg.vals[val]+'/u';
+  if(key==='fixedCost') return '£'+cfg.vals[val].toLocaleString();
+  if(key==='automation') return ['None','Low','Med','High','Full'][val];
+  return val;
+}
+
+function onSlider(key,el){
+  const val=parseInt(el.value);
+  state.sliders[key]=val;
+  const pct=(val/4)*100;
+  el.style.setProperty('--pct',pct+'%');
+  document.getElementById('sliderVal-'+key).textContent=getSliderDisplay(key,val);
+  updateMetrics();
+  updateScene();
+}
+
+function buildAdvisors(){
+  const row=document.getElementById('advisorRow');
+  row.innerHTML='';
+  ADVISORS.forEach(a=>{
+    const chip=document.createElement('div');
+    chip.className='advisor-chip';
+    chip.innerHTML=`<div class="advisor-emoji">${a.emoji}</div><div class="advisor-name">${a.name}</div><div class="advisor-tooltip"><strong>${a.name}:</strong> ${a.tip}</div>`;
+    row.appendChild(chip);
+  });
+}
+
+// ========== METRICS ==========
+const METRIC_DEFS = [
+  {key:'revBar',label:'Monthly Revenue',valKey:'revenue',fmt:v=>'£'+Math.round(v).toLocaleString()},
+  {key:'costBar',label:'Monthly Total Cost',valKey:'totalCost',fmt:v=>'£'+Math.round(v).toLocaleString()},
+  {key:'profitBar',label:'Profit / Loss',valKey:'profit',fmt:v=>(v>=0?'+':'')+' £'+Math.round(v).toLocaleString()},
+  {key:'beBar',label:'Break-Even Units',valKey:'beUnits',fmt:v=>v===Infinity?'∞ (no CM!)':Math.round(v).toLocaleString()+' u'},
+  {key:'mosBar',label:'Margin of Safety',valKey:'marginSafety',fmt:v=>v<=0?'0 (AT/BELOW BE)':'+'+Math.round(v).toLocaleString()+' u'},
+];
+
+function buildMetrics(){
+  const area=document.getElementById('metricsArea');
+  area.innerHTML='';
+  METRIC_DEFS.forEach(m=>{
+    const div=document.createElement('div');
+    div.className='metric-block';
+    div.id='metric-'+m.key;
+    div.innerHTML=`
+      <div class="metric-label">
+        <span>${m.label}</span>
+        <span class="warn" id="warn-${m.key}" style="display:none">⚠</span>
+      </div>
+      <div class="metric-value" id="metval-${m.key}">—</div>
+      <div class="metric-bar-track"><div class="metric-bar-fill" id="metbar-${m.key}" style="width:0%;background:var(--accent-blue)"></div></div>
+    `;
+    area.appendChild(div);
+  });
+  updateMetrics();
+}
+
+function updateMetrics(){
+  const m=computeMetrics(state.sliders);
+  METRIC_DEFS.forEach(md=>{
+    const bar=m[md.key]||0;
+    const fill=document.getElementById('metbar-'+md.key);
+    const val=document.getElementById('metval-'+md.key);
+    const warn=document.getElementById('warn-'+md.key);
+    if(!fill) return;
+    fill.style.width=Math.max(0,Math.min(100,bar))+'%';
+    let color=bar>60?'var(--green-bar)':bar>30?'var(--amber-bar)':'var(--red-bar)';
+    if(md.key==='profitBar') color = m.profit>=0?'var(--green-bar)':'var(--red-bar)';
+    fill.style.background=color;
+    val.textContent=md.fmt(m[md.valKey]);
+    val.style.color = md.key==='profitBar'?(m.profit>=0?'var(--accent-green)':'var(--accent-red)'):'var(--text-primary)';
+    if(warn) warn.style.display=(bar<20)?'inline':'none';
+  });
+  updateScene(m);
+}
+
+// ========== SCENE ==========
+function updateScene(m){
+  if(!m) m=computeMetrics(state.sliders);
+  // Profit indicator
+  const profitBox=document.getElementById('profitBox');
+  const profitText=document.getElementById('profitText');
+  if(m.profit>=0){
+    profitBox.setAttribute('fill','rgba(16,185,129,0.15)');
+    profitBox.setAttribute('stroke','#10b981');
+    profitText.setAttribute('fill','#10b981');
+    profitText.textContent='PROFIT +£'+Math.round(m.profit/1000)+'K';
+  } else {
+    profitBox.setAttribute('fill','rgba(239,68,68,0.15)');
+    profitBox.setAttribute('stroke','#ef4444');
+    profitText.setAttribute('fill','#ef4444');
+    profitText.textContent='LOSS −£'+Math.round(Math.abs(m.profit)/1000)+'K';
+  }
+  // Fixed cost stacks
+  const fcLevel = state.sliders.fixedCost;
+  ['fc1','fc2','fc3','fc4'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.style.opacity = i < fcLevel ? '0.8' : '0.15';
+  });
+  // Automation light
+  const al=document.getElementById('autoLight');
+  if(al){
+    const auto=state.sliders.automation;
+    al.setAttribute('fill', auto>=2?'#10b981':auto>=1?'#f59e0b':'#ef4444');
+    al.setAttribute('opacity', 0.3 + auto*0.14);
+    al.setAttribute('r', 4 + auto*1.5);
+  }
+  // Building scale with fixed cost
+  const fc=state.sliders.fixedCost;
+  const b1=document.getElementById('building1');
+  if(b1){ const h=60+fc*18; b1.setAttribute('y',200-h); b1.setAttribute('height',h); }
+  // Products visibility with units
+  const unitsLv=state.sliders.units;
+  ['p1','p2','p3','p4','p5'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.style.opacity = i < Math.ceil(unitsLv*1.2) ? '0.9' : '0.1';
+  });
+  // Break-even chart lines
+  updateBEGraph(m);
+}
+
+function updateBEGraph(m){
+  const revLine=document.getElementById('revLine');
+  const tcLine=document.getElementById('tcLine');
+  const beDot=document.getElementById('beDot');
+  const beLabel=document.getElementById('beLabel');
+  if(!revLine) return;
+
+  // Simplified visual positions
+  const maxUnits=10000;
+  const priceNorm = state.sliders.price/4;
+  const vcNorm = state.sliders.varCost/4;
+  const fcNorm = state.sliders.fixedCost/4;
+
+  // Revenue line: starts at 0, slope = price
+  const revEndY = Math.max(20, 145 - priceNorm*120);
+  revLine.setAttribute('y2', revEndY);
+  revLine.setAttribute('stroke', m.profit>=0?'#10b981':'#ef4444');
+
+  // Total cost: starts at FC level
+  const tcStartY = 145 - fcNorm*80;
+  const tcEndY = Math.max(20, tcStartY - vcNorm*80);
+  tcLine.setAttribute('y1', tcStartY);
+  tcLine.setAttribute('y2', tcEndY);
+
+  // BE point intersection (approximate visual)
+  if(m.beUnits !== Infinity && m.beUnits < maxUnits){
+    const beX = 20 + (m.beUnits/maxUnits)*125;
+    const beY = 145 - (m.beUnits/maxUnits)*priceNorm*120;
+    beDot.setAttribute('cx', Math.min(145,beX));
+    beDot.setAttribute('cy', Math.max(25,beY));
+    beLabel.setAttribute('x', Math.min(150,beX+6));
+    beLabel.setAttribute('y', Math.max(30,beY-3));
+    beDot.setAttribute('opacity','1');
+  } else {
+    beDot.setAttribute('opacity','0.2');
+  }
+}
+
+// ========== ROUND ==========
+function renderRound(){
+  const r=state.round;
+  if(r>=5){ showFinish(); return; }
+  const rd=ROUND_DATA[r];
+  updatePhaseTimeline();
+  // Round info
+  document.getElementById('roundInfo').innerHTML=`
+    <div class="round-num">ROUND ${r+1} OF 5</div>
+    <div class="focus-q">🎯 ${rd.focus}</div>
+    <div class="why-matters">📌 Why this matters: ${rd.why}</div>
+  `;
+  // Recap (rounds 2–5)
+  const recap=document.getElementById('recapCard');
+  if(r>0 && state.history.length>0){
+    const last=state.history[state.history.length-1];
+    recap.innerHTML=`<div class="recap-card"><div class="recap-title">▸ WHAT YOU'VE LEARNED SO FAR</div>Last round: Revenue £${Math.round(last.revenue/1000)}K | Total Cost £${Math.round(last.totalCost/1000)}K | ${last.profit>=0?'Profit':'Loss'} £${Math.round(Math.abs(last.profit)/1000)}K. Break-even was ${last.beUnits===Infinity?'∞':last.beUnits.toLocaleString()} units.</div>`;
+  } else { recap.innerHTML=''; }
+  // Hint
+  const hintCard=document.getElementById('hintCard');
+  if(state.wrongPredictions>=2){
+    const hints=["Try increasing selling price while keeping variable costs low — that widens your contribution margin.","Break-even = Fixed Cost ÷ (Price − Variable Cost). If VC ≥ Price, you can never break even.","Automation adds fixed cost but reduces VC. It only helps if you produce enough volume to recover that cost.","A high margin of safety means you can withstand demand shocks. Keep units well above your break-even point."];
+    hintCard.innerHTML=`<div class="hint-card"><strong>💡 Hint:</strong> ${hints[Math.min(r,hints.length-1)]}</div>`;
+  } else { hintCard.innerHTML=''; }
+  // Reset prediction
+  state.prediction=null;
+  document.querySelectorAll('.pred-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('advanceBtn').disabled=true;
+  toast(`Round ${r+1} begins — set your variables and predict the outcome!`,'');
+}
+
+function selectPred(btn,val){
+  state.prediction=val;
+  document.querySelectorAll('.pred-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('advanceBtn').disabled=false;
+  toast('Prediction locked: '+btn.textContent,'success');
+}
+
+function advanceRound(){
+  if(!state.prediction) return;
+  const r=state.round;
+  let s={...state.sliders};
+
+  // Check random event
+  const event=EVENTS.find(e=>e.round===r+1 && !state.eventTriggered[r]);
+  let eventData=null;
+  if(event){ s=event.modifier(s); state.eventTriggered[r]=true; eventData=event; }
+
+  const m=computeMetrics(s);
+  state.history.push({...m, round:r+1});
+  updateChartData();
+
+  // Check prediction accuracy
+  const actual = m.profit>50000?'thriving':m.profit>0?'stable':m.profit>-30000?'stressed':'crisis';
+  const correct = state.prediction === actual;
+  if(!correct) state.wrongPredictions++;
+  else state.wrongPredictions=Math.max(0,state.wrongPredictions-1);
+
+  showResultModal(m, actual, correct, eventData, s);
+  state.round++;
+  updateMetrics();
+}
+
+// ========== RESULT MODAL ==========
+function showResultModal(m, actual, correct, eventData, usedSliders){
+  const r=state.round;
+  const rd=ROUND_DATA[r];
+  const pred=state.prediction;
+  const predEmoji={thriving:'🌱',stable:'⚖️',stressed:'⚠️',crisis:'🔴'};
+  const actualEmoji={thriving:'🌱',stable:'⚖️',stressed:'⚠️',crisis:'🔴'};
+  const cm=m.contributionPerUnit;
+
+  // Cause-effect chain
+  let chain=[];
+  if(m.profit>=0){
+    chain=[`Price £${Math.round(m.price)}`, `CM/unit £${Math.round(cm)}`, `BE: ${m.beUnits===Infinity?'∞':m.beUnits.toLocaleString()} u`, `Actual: ${m.units.toLocaleString()} u`, `+£${Math.round(m.profit/1000)}K Profit`];
+  } else {
+    chain=[`FC £${Math.round(m.fc/1000)}K`, `BE: ${m.beUnits===Infinity?'∞':Math.round(m.beUnits)} u needed`, `Only ${m.units.toLocaleString()} produced`, `Shortfall: ${m.beUnits===Infinity?'∞':Math.round(m.beUnits-m.units)} u`, `−£${Math.round(Math.abs(m.profit)/1000)}K Loss`];
+  }
+
+  // RTF feedback (specific to slider values)
+  const feedback = generateFeedback(m, usedSliders);
+
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+    <div class="modal-header">
+      <div class="modal-title">Round ${r+1} Results</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      ${eventData?`<div class="event-card-banner"><div class="ec-title">⚡ RANDOM EVENT</div><div class="ec-text">${eventData.title} ${eventData.text}</div><div class="ec-impact">Impact: ${eventData.impact}</div></div>`:''}
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <div style="background:var(--bg-secondary);border-radius:6px;padding:10px 16px;flex:1">
+          <div style="font-size:11px;color:var(--text-muted);font-family:Space Mono,monospace;margin-bottom:4px">YOUR PREDICTION</div>
+          <div style="font-size:20px">${predEmoji[pred]} ${pred.charAt(0).toUpperCase()+pred.slice(1)}</div>
+        </div>
+        <div style="font-size:24px;color:var(--text-muted)">→</div>
+        <div style="background:var(--bg-secondary);border-radius:6px;padding:10px 16px;flex:1;border:1px solid ${correct?'var(--accent-green)':'var(--accent-red)'}">
+          <div style="font-size:11px;color:var(--text-muted);font-family:Space Mono,monospace;margin-bottom:4px">ACTUAL OUTCOME</div>
+          <div style="font-size:20px">${actualEmoji[actual]} ${actual.charAt(0).toUpperCase()+actual.slice(1)}</div>
+        </div>
+        <div style="background:${correct?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)'};border:1px solid ${correct?'var(--accent-green)':'var(--accent-red)'};border-radius:6px;padding:10px 16px;text-align:center">
+          <div style="font-size:22px">${correct?'✅':'❌'}</div>
+          <div style="font-size:11px;color:${correct?'var(--accent-green)':'var(--accent-red)'};">${correct?'CORRECT':'INCORRECT'}</div>
+        </div>
+      </div>
+      <div class="outcome-grid">
+        <div class="outcome-cell"><div class="oc-label">REVENUE</div><div class="oc-val up">£${Math.round(m.revenue/1000)}K</div></div>
+        <div class="outcome-cell"><div class="oc-label">TOTAL COST</div><div class="oc-val ${m.totalCost>m.revenue?'down':'stable'}">£${Math.round(m.totalCost/1000)}K</div></div>
+        <div class="outcome-cell"><div class="oc-label">PROFIT/LOSS</div><div class="oc-val ${m.profit>=0?'up':'down'}">${m.profit>=0?'+':'-'}£${Math.round(Math.abs(m.profit)/1000)}K</div></div>
+        <div class="outcome-cell"><div class="oc-label">BREAK-EVEN</div><div class="oc-val stable">${m.beUnits===Infinity?'∞':m.beUnits.toLocaleString()+' u'}</div></div>
+        <div class="outcome-cell"><div class="oc-label">MARGIN OF SAFETY</div><div class="oc-val ${m.marginSafety>0?'up':'down'}">${m.marginSafety>0?'+'+m.marginSafety.toLocaleString()+' u':'0 (at/below BE)'}</div></div>
+        <div class="outcome-cell"><div class="oc-label">CONTRIBUTION/UNIT</div><div class="oc-val ${cm>0?'up':'down'}">£${Math.round(cm)}/u</div></div>
+      </div>
+      <div class="cause-effect">
+        <div class="ce-title">▸ CAUSE → EFFECT CHAIN</div>
+        <div class="ce-chain">${chain.map((n,i)=>`<div class="ce-node">${n}</div>${i<chain.length-1?'<div class="ce-arrow">→</div>':''}`).join('')}</div>
+      </div>
+      <div class="feedback-box">
+        <div class="fb-title">▸ RTF STRUCTURED FEEDBACK</div>
+        <div class="fb-row"><strong>Your decision reflected:</strong> ${feedback.concept}</div>
+        <div class="fb-row"><strong>This led to:</strong> ${feedback.outcome}</div>
+        <div class="fb-row"><strong>This connects to Efficiency:</strong> ${feedback.efficiency}</div>
+      </div>
+      <div class="realworld-box">
+        <div class="rw-title">🌍 REAL-WORLD ECHO</div>
+        <div class="rw-text">${rd.realWorld}</div>
+      </div>
+      <div class="lp-section">
+        <div class="lp-title">▸ LEARNER PROFILE — Which attribute did your decision reflect?</div>
+        <div class="lp-options">
+          <button class="lp-btn" onclick="selectLP(this,'Thinker')">🧠 Thinker — I analysed before deciding</button>
+          <button class="lp-btn" onclick="selectLP(this,'Balanced')">⚖️ Balanced — I weighed risks and rewards</button>
+          <button class="lp-btn" onclick="selectLP(this,'Risk-taker')">🚀 Risk-taker — I pushed the boundaries</button>
+        </div>
+      </div>
+      <button style="width:100%;background:linear-gradient(135deg,#2563eb,#0891b2);border:none;color:#fff;font-family:Orbitron,monospace;font-size:13px;font-weight:700;letter-spacing:2px;padding:14px;border-radius:4px;cursor:pointer;margin-top:4px" onclick="closeModal()">
+        ${state.round+1>=5?'VIEW FINAL REFLECTION →':'CONTINUE TO ROUND '+(state.round+2)+' →'}
+      </button>
+    </div>
+  `;
+  document.getElementById('resultModal').classList.add('open');
+}
+
+function generateFeedback(m, s){
+  // Specific feedback based on slider values
+  const highFC = s.fixedCost >= 3;
+  const highPrice = s.price >= 3;
+  const lowVC = s.varCost <= 1;
+  const highAuto = s.automation >= 3;
+  const highVol = s.units >= 3;
+
+  let concept, outcome, efficiency;
+
+  if(highAuto && highFC){
+    concept='High automation + heavy fixed cost commitment — an aggressive capital investment strategy.';
+    outcome=m.profit>=0?`Your fixed costs were recovered through sufficient volume (${m.units.toLocaleString()} units > BE of ${m.beUnits.toLocaleString()}).`:`Your fixed costs (£${Math.round(m.fc/1000)}K) were NOT recovered — you needed ${m.beUnits===Infinity?'∞':m.beUnits.toLocaleString()} units but only produced ${m.units.toLocaleString()}.`;
+    efficiency='High fixed cost investment only achieves efficiency at large scale — matching Tesla\'s Gigafactory logic.';
+  } else if(highPrice && lowVC){
+    concept='Premium pricing with optimised variable costs — high contribution margin strategy.';
+    outcome=`Contribution margin of £${Math.round(m.contributionPerUnit)}/unit means your break-even is only ${m.beUnits===Infinity?'∞':m.beUnits.toLocaleString()} units.`;
+    efficiency='This is productive efficiency in pricing: maximising margin per unit minimises the volume needed to cover fixed costs.';
+  } else if(!highPrice && !lowVC){
+    concept='Low selling price with high variable costs — thin (or negative) contribution margin.';
+    outcome=m.contributionPerUnit<=0?`Critically, your selling price (£${Math.round(m.price)}) is below your variable cost (£${Math.round(m.vc)}) — you LOSE money on every unit.`:`Very slim contribution of £${Math.round(m.contributionPerUnit)}/unit requires ${m.beUnits.toLocaleString()} units to break even.`;
+    efficiency='This represents productive inefficiency — resources are not generating sufficient return per unit.';
+  } else {
+    concept=`Balanced production setting — ${highVol?'high':'moderate'} volume, moderate margins.`;
+    outcome=m.profit>=0?`A profit of £${Math.round(m.profit/1000)}K with a margin of safety of ${m.marginSafety.toLocaleString()} units.`:`A loss of £${Math.round(Math.abs(m.profit)/1000)}K indicates production is below break-even.`;
+    efficiency='Efficiency here depends on whether your margin of safety is large enough to absorb unexpected cost increases.';
+  }
+  return {concept, outcome, efficiency};
+}
+
+function selectLP(btn,val){
+  document.querySelectorAll('.lp-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.lpChoices.push(val);
+  toast('LP attribute recorded: '+val,'success');
+}
+
+function closeModal(){
+  document.getElementById('resultModal').classList.remove('open');
+  if(state.round>=5){ showFinish(); } else { renderRound(); }
+}
+
+// ========== CHART ==========
+let chart=null;
+let chartData=[];
+
+function initChart(){
+  const canvas=document.getElementById('chartCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth*2||800;
+  canvas.height=360;
+  drawChart(ctx, canvas.width, canvas.height);
+}
+
+function updateChartData(){
+  chartData=state.history.map(h=>({
+    round:h.round,
+    revenue:h.revBar,
+    cost:h.costBar,
+    profit:h.profitBar,
+    be:h.beBar,
+    mos:h.mosBar
+  }));
+  const canvas=document.getElementById('chartCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth*2||800;
+  drawChart(ctx, canvas.width, 360);
+}
+
+function drawChart(ctx, W, H){
+  ctx.clearRect(0,0,W,H);
+  const pad={l:40,r:20,t:20,b:30};
+  const w=W-pad.l-pad.r;
+  const h=H-pad.t-pad.b;
+  const rounds=5;
+
+  // Grid
+  ctx.strokeStyle='rgba(30,58,95,0.6)';
+  ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+h-(i/4)*h;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+w,y); ctx.stroke();
+    ctx.fillStyle='rgba(71,85,105,0.8)'; ctx.font=`${Math.round(W/100)}px Space Mono`; ctx.textAlign='right';
+    ctx.fillText((i*25)+'%',pad.l-5,y+4);
+  }
+  for(let r=1;r<=rounds;r++){
+    const x=pad.l+(r-0.5)*(w/rounds);
+    ctx.beginPath(); ctx.setLineDash([4,4]); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+h); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(71,85,105,0.8)'; ctx.textAlign='center';
+    ctx.fillText('R'+r,x,pad.t+h+18);
+  }
+
+  if(chartData.length===0) return;
+
+  const series=[
+    {key:'revenue',color:'#3b82f6',label:'Revenue'},
+    {key:'cost',color:'#f59e0b',label:'Total Cost'},
+    {key:'profit',color:'#10b981',label:'Profit'},
+    {key:'mos',color:'#8b5cf6',label:'Margin Safety'},
+  ];
+
+  series.forEach(s=>{
+    ctx.beginPath();
+    ctx.strokeStyle=s.color;
+    ctx.lineWidth=2;
+    ctx.shadowColor=s.color;
+    ctx.shadowBlur=6;
+    chartData.forEach((d,i)=>{
+      const x=pad.l+(d.round-0.5)*(w/rounds);
+      const y=pad.t+h-(d[s.key]/100)*h;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.shadowBlur=0;
+    // Dots
+    chartData.forEach(d=>{
+      const x=pad.l+(d.round-0.5)*(w/rounds);
+      const y=pad.t+h-(d[s.key]/100)*h;
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle=s.color; ctx.fill();
+    });
+  });
+
+  // Legend
+  const lx=pad.l;
+  series.forEach((s,i)=>{
+    ctx.fillStyle=s.color;
+    ctx.fillRect(lx+i*90,4,12,8);
+    ctx.fillStyle='rgba(148,163,184,0.8)';
+    ctx.font=`${Math.round(W/120)}px Space Mono`;
+    ctx.textAlign='left';
+    ctx.fillText(s.label,lx+i*90+16,12);
+  });
+}
+
+// ========== FINISH ==========
+function showFinish(){
+  state.done=true;
+  buildSliders(); // disable sliders
+  const recap=document.getElementById('recapCard');
+  recap.innerHTML=`
+    <div class="finish-banner">
+      <h3>🎉 Simulation Complete!</h3>
+      <p>You completed all 5 rounds. Review your performance chart and open the IB Reflection Panel to consolidate your learning.</p>
+      <button id="reflectionBtn" onclick="document.getElementById('reflectionPanel').style.display='block'">📝 OPEN IB REFLECTION PANEL</button>
+    </div>
+  `;
+  document.getElementById('roundInfo').innerHTML=`<div class="round-num">SIMULATION COMPLETE</div><div class="focus-q">Review your results and reflect using the IB questions →</div>`;
+  toast('All 5 rounds complete! Open the Reflection Panel to finish.','success');
+}
+
+// ========== RESET ==========
+function resetSim(){
+  state={round:0,maxRounds:5,prediction:null,wrongPredictions:0,sliders:{units:2,price:2,varCost:2,fixedCost:2,automation:2},history:[],eventTriggered:{},lpChoices:[],done:false};
+  chartData=[];
+  buildSliders();
+  updateMetrics();
+  updateScene();
+  renderRound();
+  updateChartData();
+  toast('Simulation reset to Round 1.','warn');
+}
+
+// ========== TOAST ==========
+function toast(msg,type=''){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');
+  t.className='toast'+(type?' '+type:'');
+  t.textContent=msg;
+  c.appendChild(t);
+  setTimeout(()=>{
+    t.classList.add('out');
+    setTimeout(()=>t.remove(),400);
+  },3000);
+}
+
+// ========== INIT ==========
+window.addEventListener('load',()=>{
+  // Pre-init state for scene
+});
+
+// Belt animation
+let beltOffset=0;
+function animateBelt(){
+  beltOffset=(beltOffset+0.3)%30;
+  const segs=document.querySelectorAll('.belt-seg');
+  segs.forEach((s,i)=>{ s.setAttribute('x', 225+(i*30+beltOffset)%360); });
+  // Product movement
+  const prods=['p1','p2','p3','p4','p5'];
+  prods.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el){
+      let x=parseFloat(el.getAttribute('x')||240)+0.5;
+      if(x>580) x=230;
+      el.setAttribute('x',x);
+    }
+  });
+  requestAnimationFrame(animateBelt);
+}
+animateBelt();
+
+// Smoke animation
+let smokeT=0;
+function animateSmoke(){
+  smokeT+=0.02;
+  const s1=document.getElementById('smoke1');
+  const s2=document.getElementById('smoke2');
+  if(s1){ s1.setAttribute('cy', 45-Math.sin(smokeT)*6); s1.setAttribute('r',6+Math.sin(smokeT)*2); }
+  if(s2){ s2.setAttribute('cy', 40-Math.sin(smokeT+1)*5); }
+  setTimeout(animateSmoke,50);
+}
+animateSmoke();
+</script>
+</body>
+</html>
